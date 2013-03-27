@@ -863,7 +863,33 @@ def check_message_schedule(message_schedule):
 
 
 def check_schedule(message_schedule):
-    return true #STUB
+    schedule = message_schedule.schedule
+    now = datetime.utcnow()
+    refdate = message_schedule.lastposted or schedule.start
+
+    if frequency == 'monthly':
+        lastmonth = date.today().replace(day=1) - timedelta(days=1)
+        monthlength = lastmonth.day
+        if now - refdate > timedelta(days=monthlength):
+            return true
+
+    elif frequency == 'weekly':
+        if now - refdate > timedelta(days=7):
+            return true
+
+    elif frequency == 'daily':
+        if now - refdate > timedelta(days=1):
+            return true
+
+    else: #frequency = 'once'
+        if message_schedule.lastposted:
+            return
+        if schedule.start and now < schedule.start:
+            return
+
+        return true
+
+
 def post_scheduled_message(message_schedule):
     template = message_schedule.template
     message = render_template(template)
