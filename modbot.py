@@ -298,6 +298,11 @@ def filter_conditions(name, conditions):
                 c.is_shadowbanned != True]
 
 
+def filter_message_schedules(frequency, message_schedules):
+    """Filters a list of conditions based on the queue's needs."""
+
+    return [x for x in message_schedules if x.frequency == frequency]
+
 def check_conditions(subreddit, item, conditions):
     """Checks an item against a set of conditions.
 
@@ -835,6 +840,39 @@ def check_queues(sr_dict, cond_dict):
                 check_items(queue, items, sr_dict, cond_dict, stop_time)
 
 
+def check_message_schedules(sr_dict, ms_dict):
+    """Checks all the queues for new items to process."""
+    subreddits = get_subreddits_for_queue(sr_dict, ms_dict, '')
+    if not subreddits:
+        return
+
+    for subreddit in subreddits:
+        message_schedules = ms_dict[subreddit]
+        for message_schedule in message_schedules:
+            check_message_schedule(message_schedule)
+
+
+def check_message_schedule(message_schedule):
+    if not message_schedule.enabled:
+        return
+
+    if not check_schedule(message_schedule):
+        return
+
+    post_scheduled_message(message_schedule)
+
+
+def check_schedule(message_schedule):
+    return true #STUB
+def post_scheduled_message(message_schedule):
+    template = message_schedule.template
+    message = render_template(template)
+    subreddit = message_schedule.subreddit
+    #TODO: post message to subreddit
+
+    #TODO: send URL to modmail
+
+
 def main():
     logging.config.fileConfig(path_to_cfg)
     start_utc = datetime.utcnow()
@@ -858,6 +896,7 @@ def main():
         # build sr_dict including only subs both in db and modded_subs
         sr_dict = dict()
         cond_dict = dict()
+        ms_dict = dict()
         for subreddit in subreddits:
             if subreddit.name.lower() in modded_subs:
                 sr_dict[subreddit.name.lower()] = subreddit
@@ -867,11 +906,15 @@ def main():
                     'spam': filter_conditions('spam', conditions),
                     'submission': filter_conditions('submission', conditions),
                     'comment': filter_conditions('comment', conditions) }
+                message_schedules = subreddit.message_schedules.all()
+                ms_dict[subreddit.name.lower()] = message_schedules
 
     except Exception as e:
         logging.error('  ERROR: %s', e)
 
     check_queues(sr_dict, cond_dict)
+
+    check_message_schedules(sr_dict, ms_dict)
 
     # respond to modmail
     try:
