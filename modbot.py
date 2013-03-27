@@ -898,6 +898,9 @@ def post_scheduled_message(message_schedule):
 
     #TODO: send URL to modmail
 
+def render_template(template):
+    return template #STUB
+
 
 def main():
     logging.config.fileConfig(path_to_cfg)
