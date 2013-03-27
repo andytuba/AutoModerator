@@ -306,3 +306,36 @@ class UserCache(Base):
     shadowbanned_last_check = Column(DateTime)
     info_last_check = Column(DateTime)
 
+
+class MessageTemplate(Base):
+    __tablename__ = 'message_template'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255), nullable=False)
+    url = Column(String(255))
+    text = Column(String(10000))
+
+
+class Schedule(Base):
+    __tablename__ = 'schedule'
+
+    id = Column(Integer, primary_key=True)
+    start = Column(DateTime)
+    frequency = Column(Enum('once', 'daily','weekly','monthly',name='condition_frequency'),
+                       default=True, 
+                       nullable=False)
+
+class MessageSchedule(Base):
+    __tablename__ = 'message_schedule'
+
+    id = Column(Integer, primary_key=True)
+    enabled = Column(Boolean)
+    subreddit = Column(String(255), nullable=False)
+    template = Column(Integer, ForeignKey('message_template.id'))
+    schedule = Column(Integer, ForeignKey('schedule.id'))
+    lastposted = Column(DateTime)
+    notes = Column(Text)
+
+
+    subreddit = relationship('Subreddit',
+        backref=backref('message_schedules', lazy='dynamic'))
