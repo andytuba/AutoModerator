@@ -7,8 +7,10 @@ from datetime import datetime, timedelta
 from math import ceil
 from time import time
 
+
 import praw
-from bs4 import BeautifulSoup
+#from BeautifulSoup import BeautifulSoup
+import BeautifulSoup
 from sqlalchemy import func
 from sqlalchemy.sql import and_
 from sqlalchemy.orm.exc import NoResultFound
@@ -299,7 +301,7 @@ def filter_conditions(name, conditions):
 
 
 def filter_message_schedules(frequency, message_schedules):
-    """Filters a list of conditions based on the queue's needs."""
+    """Filters a list of schedules based on the frequency to check."""
 
     return [x for x in message_schedules if x.frequency == frequency]
 
@@ -940,6 +942,10 @@ def main():
 
     except Exception as e:
         logging.error('  ERROR: %s', e)
+        sr_dict = False
+
+    if not sr_dict:
+        return -1
 
     check_queues(sr_dict, cond_dict)
 
