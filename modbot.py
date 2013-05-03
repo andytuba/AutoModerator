@@ -902,16 +902,32 @@ def check_schedule(message_schedule):
 
 
 def post_scheduled_message(message_schedule):
-    template = message_schedule.template
-    message = render_template(template)
-    subreddit = message_schedule.subreddit
-    #TODO: post message to subreddit
+    # Mark scheduled post to avoid re-trying too often after failure
+    message_schedule.lastposted = datetime.now()
+    session.commit()
 
-    #TODO: send URL to modmail
+
+    title, text, url = render_template(message_schedule.template)
+    subreddit = message_schedule.subreddit
+
+    
+    # Post message to subreddit
+    if message_schedule.template.url:
+        submission = r.submit(subreddit.name, title, url=url)
+    else:
+        submission = r.submit(subreddit.name, title, text=text)
+    log_request('submit')
+
+    if message_schedule.distinguish:
+        submission.distinguish()
+        log_request('distinguish post')
+
+    # Message modmail
+    r.send_message('/r/%s' % subreddit.name, 'Submitted scheduled post', 'Posted scheduled message to %s' % submission.short_link )
+    log_request('send_message')
 
 def render_template(template):
-    return template #STUB
-
+    return (template.title, template.text, template.url) #STUB
 
 def main():
     logging.config.fileConfig(path_to_cfg)
