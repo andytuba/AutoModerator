@@ -330,7 +330,10 @@ class MessageSchedule(Base):
 
     id = Column(Integer, primary_key=True)
     enabled = Column(Boolean)
-    subreddit = Column(String(255), nullable=False)
+    subreddit_id = Column(Integer,
+                          ForeignKey('subreddits.id'),
+                          primary_key=True,
+                          nullable=False)
     template = Column(Integer, ForeignKey('message_template.id'))
     schedule = Column(Integer, ForeignKey('schedule.id'))
     lastposted = Column(DateTime)
