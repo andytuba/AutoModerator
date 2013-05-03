@@ -776,6 +776,12 @@ def get_subreddits_for_queue(sr_dict, cond_dict, queue):
 
     return list(relevant_subreddits)
 
+def get_subreddits_for_message_schedules(sr_dict, ms_dict):
+    """Returns a list of subreddits which have scheduled messages"""
+    
+    return [ name for name in sr_dict if name in ms_dict.keys()  ]
+
+
 
 def check_queues(sr_dict, cond_dict):
     """Checks all the queues for new items to process."""
@@ -844,7 +850,8 @@ def check_queues(sr_dict, cond_dict):
 
 def check_message_schedules(sr_dict, ms_dict):
     """Checks all the queues for new items to process."""
-    subreddits = get_subreddits_for_queue(sr_dict, ms_dict, '')
+
+    subreddits = get_subreddits_for_message_schedules(sr_dict, ms_dict)
     if not subreddits:
         return
 
