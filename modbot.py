@@ -875,20 +875,22 @@ def check_schedule(message_schedule):
     schedule = message_schedule.schedule
     now = datetime.utcnow()
     refdate = message_schedule.lastposted or schedule.start
+    frequency = schedule.frequency
+
 
     if frequency == 'monthly':
         lastmonth = date.today().replace(day=1) - timedelta(days=1)
         monthlength = lastmonth.day
         if now - refdate > timedelta(days=monthlength):
-            return true
+            return True
 
     elif frequency == 'weekly':
         if now - refdate > timedelta(days=7):
-            return true
+            return True
 
     elif frequency == 'daily':
         if now - refdate > timedelta(days=1):
-            return true
+            return True
 
     else: #frequency = 'once'
         if message_schedule.lastposted:
@@ -896,7 +898,7 @@ def check_schedule(message_schedule):
         if schedule.start and now < schedule.start:
             return
 
-        return true
+        return True
 
 
 def post_scheduled_message(message_schedule):
