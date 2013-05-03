@@ -353,3 +353,17 @@ class MessageSchedule(Base):
         backref=backref('schedules', lazy='dynamic'))
     schedule = relationship('Schedule', 
         backref=backref('message_schedules', lazy='dynamic'))
+
+class MessageScheduleEvent(Base):
+    __tablename__ = 'message_schedule_event'
+
+    id = Column(Integer, primary_key=True)
+    datetime = Column(DateTime)
+    messageschedule_id = Column(Integer, 
+                                ForeignKey('message_schedule.id'),
+                                primary_key=True,
+                                nullable=False)
+    messageschedule = relationship('MessageSchedule', 
+        backref=backref('events', lazy='dynamic'))
+    postid = Column(Text, nullable=True)
+    status = Column(Text)

@@ -904,27 +904,45 @@ def check_schedule(message_schedule):
 def post_scheduled_message(message_schedule):
     # Mark scheduled post to avoid re-trying too often after failure
     message_schedule.lastposted = datetime.now()
+    event = MessageScheduleEvent()
+    event.messageschedule = message_schedule
+    event.datetime = datetime.now()
+    session.add(event)
     session.commit()
 
 
     title, text, url = render_template(message_schedule.template)
     subreddit = message_schedule.subreddit
 
-    
-    # Post message to subreddit
-    if message_schedule.template.url:
-        submission = r.submit(subreddit.name, title, url=url)
-    else:
-        submission = r.submit(subreddit.name, title, text=text)
-    log_request('submit')
+    try:
+        # Post message to subreddit
+        if message_schedule.template.url:
+            submission = r.submit(subreddit.name, title, url=url)
+        else:
+            submission = r.submit(subreddit.name, title, text=text)
+        log_request('submit')
 
-    if message_schedule.distinguish:
-        submission.distinguish()
-        log_request('distinguish post')
+        if message_schedule.distinguish:
+            submission.distinguish()
+            log_request('distinguish post')
+
+        event.status = 'success'
+        event.postid = submission.id
+
+        r.send_message('/r/%s' % subreddit.name, 'Submitted scheduled post', 'Posted scheduled message to %s' % submission.short_link )
+        log_request('send_message')
+    except Exception as e:
+        logging.warning('..! error while submitting scheduled message: %s', e)
+        event.status = 'error: %s' % e
+
+        r.send_message('/r/%s' % subreddit.name, 'Failed to submit scheduled post', 'Could not subimt scheduled message: %s ' % e)
+        log_request('send_message')
+
+    session.commit()
 
     # Message modmail
-    r.send_message('/r/%s' % subreddit.name, 'Submitted scheduled post', 'Posted scheduled message to %s' % submission.short_link )
-    log_request('send_message')
+    
+
 
 def render_template(template):
     return (template.title, template.text, template.url) #STUB
