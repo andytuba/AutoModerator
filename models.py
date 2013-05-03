@@ -334,11 +334,20 @@ class MessageSchedule(Base):
                           ForeignKey('subreddits.id'),
                           primary_key=True,
                           nullable=False)
-    template = Column(Integer, ForeignKey('message_template.id'))
-    schedule = Column(Integer, ForeignKey('schedule.id'))
+    template_id = Column(Integer, 
+                         ForeignKey('message_template.id'),
+                         primary_key=True,
+                         nullable=False)
+    schedule_id = Column(Integer, 
+                        ForeignKey('schedule.id'),
+                        primary_key=True,
+                        nullable=False)
     lastposted = Column(DateTime)
     notes = Column(Text)
 
-
     subreddit = relationship('Subreddit',
+        backref=backref('message_schedules', lazy='dynamic'))
+    template = relationship('MessageTemplate', 
+        backref=backref('schedules', lazy='dynamic'))
+    schedule = relationship('Schedule', 
         backref=backref('message_schedules', lazy='dynamic'))
