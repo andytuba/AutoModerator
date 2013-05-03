@@ -342,6 +342,8 @@ class MessageSchedule(Base):
                         ForeignKey('schedule.id'),
                         primary_key=True,
                         nullable=False)
+    distinguish = Column(Boolean,
+                         default=True)
     lastposted = Column(DateTime)
     notes = Column(Text)
 
