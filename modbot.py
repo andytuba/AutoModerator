@@ -862,12 +862,17 @@ def check_message_schedules(sr_dict, ms_dict):
 
 
 def check_message_schedule(message_schedule):
+    logging.info("Checking message schedule %s (/r/%s): %s" % (message_schedule.id, message_schedule.subreddit.name, message_schedule.template.title))
+
     if not message_schedule.enabled:
+        logging.info(" ... not enabled, done")
         return
 
     if not check_schedule(message_schedule):
+        logging.info(" ... not scheduled for right now, done")
         return
 
+    logging.info("... message should be posted")
     post_scheduled_message(message_schedule)
 
 
